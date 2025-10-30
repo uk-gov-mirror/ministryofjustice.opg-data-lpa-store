@@ -214,17 +214,18 @@ type IndependentWitnessPreRegistrationCorrection struct {
 }
 
 func (c IndependentWitnessPreRegistrationCorrection) Apply(lpa *shared.Lpa) []shared.FieldError {
-	if c.FirstNames != "" && c.LastName != "" && c.Phone != "" && !c.Address.IsZero() {
-		iw := &shared.IndependentWitness{
-			Person: shared.Person{
-				FirstNames: c.FirstNames,
-				LastName:   c.LastName,
-			},
-			Phone:   c.Phone,
-			Address: c.Address,
+	if c.FirstNames != "" && c.LastName != "" {
+		lpa.IndependentWitness.Person = shared.Person{
+			FirstNames: c.FirstNames,
+			LastName:   c.LastName,
 		}
+	}
+	if c.Phone != "" {
+		lpa.IndependentWitness.Phone = c.Phone
+	}
 
-		lpa.IndependentWitness = iw
+	if !c.Address.IsZero() {
+		lpa.IndependentWitness.Address = c.Address
 	}
 
 	return nil
@@ -316,6 +317,17 @@ func validateCorrection(changes []shared.Change, lpa *shared.Lpa) (Correction, [
 	data.CertificateProvider.Phone = lpa.CertificateProvider.Phone
 	if lpa.CertificateProvider.SignedAt != nil {
 		data.CertificateProvider.SignedAt = *lpa.CertificateProvider.SignedAt
+	}
+
+	if lpa.AuthorisedSignatory != nil {
+		data.AuthorisedSignatory.FirstNames = lpa.AuthorisedSignatory.FirstNames
+		data.AuthorisedSignatory.LastName = lpa.AuthorisedSignatory.LastName
+	}
+
+	if lpa.IndependentWitness != nil {
+		data.IndependentWitness.FirstNames = lpa.IndependentWitness.FirstNames
+		data.IndependentWitness.LastName = lpa.IndependentWitness.LastName
+		data.IndependentWitness.Address = lpa.IndependentWitness.Address
 	}
 
 	data.WitnessedBy.WitnessedByCertificateProviderAt = lpa.WitnessedByCertificateProviderAt
